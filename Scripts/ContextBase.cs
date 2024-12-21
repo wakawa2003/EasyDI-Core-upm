@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace EasyDI
 {
@@ -150,9 +149,6 @@ namespace EasyDI
                 {
                     int i = 0;
                     tempIDecore temp = default;
-                    var interfaceType = obj.GetType().GetInterface(typeof(IEasyDIDecore<>).Name);
-                    var proprety_decore = interfaceType.GetProperty(nameof(temp.Decore));
-                    var proprety_prevDecore = interfaceType.GetProperty(nameof(temp.PrevDecore));
 
 
                     foreach (BindInfor bind in decoreList)
@@ -160,14 +156,22 @@ namespace EasyDI
                         i++;
                         if (obj != null)
                         {
-                            if (isIEasyDIDecorator(obj))
+                            Type typeInterfaces = null;
+                            if (_findIEasyDIDecorator(obj, bind.TypeTarget, out typeInterfaces))
                             {
+                                //Debug.Log($"type target: {bind.TypeTarget.Name}");
                                 //Debug.Log($"Danh sach");
-                                //foreach (var item in obj.GetType().GetRuntimeMethods())
+                                //foreach (var @interface in obj.GetType().GetInterfaces())
                                 //{
-                                //    Debug.Log($"method: {item.Name}");
-
+                                //    Debug.Log($"interface nam: {@interface.Name}");
+                                //    foreach (var item in @interface.GenericTypeArguments)
+                                //    {
+                                //        Debug.Log($"     -generic: {item.Name}");
+                                //    }
                                 //}
+
+                                var proprety_decore = typeInterfaces.GetProperty(nameof(temp.Decore));
+                                var proprety_prevDecore = typeInterfaces.GetProperty(nameof(temp.PrevDecore));
 
                                 var memberInObj = _getMemberIsDecoratorInObject(obj, bind.TypeTarget);
                                 if (checkWherePredict(bind.WherePredict, obj, memberInObj))
@@ -211,17 +215,24 @@ namespace EasyDI
                     }
                     return obj;
 
-                    static bool isIEasyDIDecorator(object obj)
+
+                    static bool _findIEasyDIDecorator(object obj, Type typeInterfaceInput, out Type typeInterfacesOutput)
                     {
-                        var interfacessFound = obj.GetType().FindInterfaces(MyInterfaceFilter, typeof(IEasyDIDecore<>).Name);
+                        var interfacessFound = obj.GetType().FindInterfaces(_myInterfaceFilter, typeof(IEasyDIDecore<>).Name);
+                        typeInterfacesOutput = interfacessFound[0];
                         return (interfacessFound.Length > 0);
-                    }
-                    static bool MyInterfaceFilter(Type typeObj, System.Object criteriaObj)
-                    {
-                        if (typeObj.ToString().Contains(criteriaObj.ToString()))
-                            return true;
-                        else
-                            return false;
+
+
+                        //check if interfaces has IEasyDIDecore<iHealth>
+                        bool _myInterfaceFilter(Type typeObj, System.Object criteriaObj)
+                        {
+
+                            if (typeObj.ToString().Contains(criteriaObj.ToString())//if object is IEasyDIDecore<> and has generic parameter same interface input (exp : iHealth)
+                               && typeObj.GetGenericArguments().ToList().Contains(typeInterfaceInput))
+                                return true;
+                            else
+                                return false;
+                        }
                     }
 
                     static MemberInfo _getMemberIsDecoratorInObject(object obj, Type typeDecore)

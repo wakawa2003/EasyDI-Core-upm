@@ -55,6 +55,52 @@ namespace EasyDI.UnitTest
             {
                 return new buffHealth(3);
             }).AsTransient();
+
+            ContainerBinding.Bind<iDamage>().To<iDamage.Temp>().CustomGetInstance((obj, mem) =>
+            {
+                return new iDamage.Temp();
+            }).AsTransient();
+
+
+            ContainerBinding.Bind<iAttacker>().To<iAttacker.Temp>().CustomGetInstance((obj, mem) =>
+            {
+                return new iAttacker.Temp();
+            }).AsTransient();
+
+            ContainerBinding.Decore<iDamage>().To<buffDamage>().CustomGetInstance((obj, mem) =>
+            {
+                return new buffDamage();
+            }).AsTransient();
+
+            ContainerBinding.Decore<iCharacter>().To<buffCharacter>().CustomGetInstance((obj, mem) =>
+            {
+                return new buffCharacter();
+            }).AsTransient();
+        }
+
+        public class buffDamage : iDamage
+        {
+            int iDamage._damage { get; set; }
+            [Inject] iDamage IEasyDIDecore<iDamage>.Decore { get; set; }
+            iDamage IEasyDIDecore<iDamage>.PrevDecore { get; set; }
+        }
+
+        public class buffCharacter : iCharacter
+        {
+            public float Speed { get; set; }
+            public iSpeed Decore { get; set; }
+            public iSpeed PrevDecore { get; set; }
+            public int _health { get; set; }
+            public int _maxHealth { get; set; }
+            public int _damage { get; set; }
+            [Inject] iHealth IEasyDIDecore<iHealth>.Decore { get; set; }
+            [Inject] iAttacker IEasyDIDecore<iAttacker>.Decore { get; set; }
+            [Inject] iDamage IEasyDIDecore<iDamage>.Decore { get; set; }
+            [Inject] iCharacter IEasyDIDecore<iCharacter>.Decore { get; set; }
+            iHealth IEasyDIDecore<iHealth>.PrevDecore { get; set; }
+            iAttacker IEasyDIDecore<iAttacker>.PrevDecore { get; set; }
+            iDamage IEasyDIDecore<iDamage>.PrevDecore { get; set; }
+            iCharacter IEasyDIDecore<iCharacter>.PrevDecore { get; set; }
         }
 
         public class buffHealth : iHealth

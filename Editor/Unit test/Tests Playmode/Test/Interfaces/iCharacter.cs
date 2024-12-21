@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace EasyDI.UnitTest
 {
-    public interface iCharacter : iSpeed, iHealth
+    public interface iCharacter : iSpeed, iHealth, iAttacker, iDamage, IEasyDIDecore<iCharacter>
     {
 
     }

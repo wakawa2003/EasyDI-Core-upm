@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace EasyDI.UnitTest
 {
-    public class characterController : MonoBehaviour, iCharacter, iSpeed, iHealth
+    public class characterController : MonoBehaviour, iCharacter, iSpeed, iHealth, iDamage
     {
         [Inject] public string StringProperties1 { get; set; }
 
@@ -14,10 +14,18 @@ namespace EasyDI.UnitTest
         [Inject] iSpeed IEasyDIDecore<iSpeed>.Decore { get; set; }
         iSpeed IEasyDIDecore<iSpeed>.PrevDecore { get; set; }
 
-        [Inject] public iHealth Decore { get; set; }
-        public iHealth PrevDecore { get; set; }
+
         public int _health { get; set; }
         public int _maxHealth { get; set; }
+        [Inject] iHealth IEasyDIDecore<iHealth>.Decore { get; set; }
+        iHealth IEasyDIDecore<iHealth>.PrevDecore { get; set; }
+        public int _damage { get; set; }
+        [Inject] public iDamage Decore { get; set; }
+        public iDamage PrevDecore { get; set; }
+        [Inject] iCharacter IEasyDIDecore<iCharacter>.Decore { get; set; }
+        iCharacter IEasyDIDecore<iCharacter>.PrevDecore { get; set; }
+        [Inject] iAttacker IEasyDIDecore<iAttacker>.Decore { get; set; }
+        iAttacker IEasyDIDecore<iAttacker>.PrevDecore { get; set; }
 
         [Inject] public classIsSingleton classIsSingleton;
         [Inject(tags.tag1)] public string stringFieldTag1;
