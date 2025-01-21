@@ -54,17 +54,27 @@ public interface IEasyDIDecore<T>
     /// <param name="onPeek"></param>
     void ForeachDecore(Action<T> onPeek)
     {
+        int countLoop = 0;
         var root = GetRoot();
         var nextCheck = root;
         var start = root;
         while (nextCheck != null)
         {
             onPeek?.Invoke(nextCheck);
-            nextCheck = (nextCheck as IEasyDIDecore<T>).Decore;
-            if (nextCheck.Equals(start))//tranh loop
+            nextCheck = (nextCheck as IEasyDIDecore<T>).Decore; 
+
+            if (nextCheck != null)//tranh loop
             {
-                EasyDI.EasyDILog.LogError($"Loop decorator detected!");
-                break;
+                if (nextCheck.Equals(start))//tranh loop
+                {
+                    countLoop++;
+                }
+                if (countLoop > 2)
+                {
+                    EasyDI.EasyDILog.LogError($"Loop decorator detected!");
+                    break;
+
+                }
             }
         }
 
