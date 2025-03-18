@@ -12,6 +12,7 @@ namespace EasyDI.UnitTest
         public static string idSingleton;
         public static string stringTagForTagSingleton = "value for string singleton";
         public static float buffSpeedValue = 3;
+        public static int buffHeallValue = 54;
 
         public override void InstallBinding()
         {
@@ -42,24 +43,24 @@ namespace EasyDI.UnitTest
 
             ContainerBinding.Decore<iSpeed>().To<buffSpeedInScene>().CustomGetInstance((a, b) => new buffSpeedInScene());
 
-            ContainerBinding.Bind<iHealth>().To<iHealth.Temp>().CustomGetInstance((obj, mem) =>
-            {
-                return new iHealth.Temp();
-            }).AsTransient();
+            //ContainerBinding.Bind<iHealth>().To<iHealth.Temp>().CustomGetInstance((obj, mem) =>
+            //{
+            //    return new iHealth.Temp();
+            //}).AsTransient();
 
-            ContainerBinding.Decore<iHealth>().To<iHealth.Temp>().CustomGetInstance((obj, mem) =>
+            ContainerBinding.Decore<iHealth>().To<buffHealth>().CustomGetInstance((obj, mem) =>
             {
-                return new buffHealth(2);
+                return new buffHealth(buffHeallValue);
             }).AsTransient();
-            ContainerBinding.Decore<iHealth>().To<iHealth.Temp>().CustomGetInstance((obj, mem) =>
-            {
-                return new buffHealth(3);
-            }).AsTransient();
+            //ContainerBinding.Decore<iHealth>().To<buffHealth>().CustomGetInstance((obj, mem) =>
+            //{
+            //    return new buffHealth(3);
+            //}).AsTransient();
 
-            ContainerBinding.Bind<iDamage>().To<iDamage.Temp>().CustomGetInstance((obj, mem) =>
-            {
-                return new iDamage.Temp();
-            }).AsTransient();
+            //ContainerBinding.Bind<iDamage>().To<iDamage.Temp>().CustomGetInstance((obj, mem) =>
+            //{
+            //    return new iDamage.Temp();
+            //}).AsTransient();
 
 
             ContainerBinding.Bind<iAttacker>().To<iAttacker.Temp>().CustomGetInstance((obj, mem) =>
@@ -88,7 +89,7 @@ namespace EasyDI.UnitTest
         public class buffCharacter : iCharacter
         {
             public float Speed { get; set; }
-            public iSpeed Decore { get; set; }
+            [Inject] public iSpeed Decore { get; set; }
             public iSpeed PrevDecore { get; set; }
             public int _health { get; set; }
             public int _maxHealth { get; set; }

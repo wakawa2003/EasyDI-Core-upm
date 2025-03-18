@@ -23,7 +23,7 @@ namespace EasyDI.UnitTest
             ContainerBinding.Bind<iCharacter>().To<characterController>().FromInstance(GetComponent<characterController>());
 
 
-            ContainerBinding.Bind<iSpeed>().To<buffSpeed>().CustomGetInstance((a, b) => new buffSpeed());
+            ContainerBinding.Decore<iSpeed>().To<buffSpeed>().CustomGetInstance((a, b) => new buffSpeed());
             ContainerBinding.Decore<iSpeed>().To<buffSpeed>().CustomGetInstance((a, b) => new buffSpeed());
             ContainerBinding.Decore<iSpeed>().To<buffSpeed2>().CustomGetInstance((a, b) => new buffSpeed2());
             //ContainerBinding.Decore<iSpeed>().To<buffSpeed>().FromInstance(new buffSpeed()).AsTransient();

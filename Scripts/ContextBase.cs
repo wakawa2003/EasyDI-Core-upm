@@ -147,13 +147,10 @@ namespace EasyDI
                 //return lastest decore object
                 static object _decore(object obj, List<BindInfor> decoreList)
                 {
-                    int i = 0;
                     tempIDecore temp = default;
-
-
+                    object lastOBJ = obj;
                     foreach (BindInfor bind in decoreList)
                     {
-                        i++;
                         if (obj != null)
                         {
                             Type typeInterfaces = null;
@@ -170,8 +167,7 @@ namespace EasyDI
                                 //    }
                                 //}
 
-                                var proprety_decore = typeInterfaces.GetProperty(nameof(temp.Decore));
-                                var proprety_prevDecore = typeInterfaces.GetProperty(nameof(temp.PrevDecore));
+                                var add_decore_Method = typeInterfaces.GetMethod(nameof(temp.AddDecore));
 
                                 var memberInObj = _getMemberIsDecoratorInObject(obj, bind.TypeTarget);
                                 if (checkWherePredict(bind.WherePredict, obj, memberInObj))
@@ -180,29 +176,19 @@ namespace EasyDI
 
                                     if (newData != null)
                                     {
-
-                                        //similar AddDecore in IEasyDIDecore<T>
-                                        var oldDecore = proprety_decore.GetValue(obj);
-                                        if (oldDecore != newData)
+                                        if (newData == obj)
                                         {
-                                            proprety_decore.SetValue(obj, newData);
-                                            proprety_prevDecore.SetValue(newData, obj);
-                                            proprety_decore.SetValue(newData, oldDecore);
-
-                                            if (oldDecore != null)
-                                            {
-                                                var typeOld = oldDecore.GetType();
-                                                var old_prevDecore = typeOld.GetProperty(nameof(temp.PrevDecore));
-                                                old_prevDecore.SetValue(oldDecore, newData);
-                                            }
-
-                                            obj = newData;
+                                            EasyDILog.LogError("Same Decore Object!!");
+                                            continue;
                                         }
-                                        else
+                                        if (newData == lastOBJ)
                                         {
-                                            //EasyDILog.LogError("Circular Decore!!");
-                                            return null;
+                                            EasyDILog.LogError("Same Decore Object!!");
+                                            continue;
                                         }
+
+                                        add_decore_Method.Invoke(obj, new object[] { newData });
+                                        lastOBJ = newData;
                                     }
                                     else
                                     {
@@ -213,13 +199,16 @@ namespace EasyDI
 
                         }
                     }
-                    return obj;
+                    return lastOBJ;
 
 
                     static bool _findIEasyDIDecorator(object obj, Type typeInterfaceInput, out Type typeInterfacesOutput)
                     {
                         var interfacessFound = obj.GetType().FindInterfaces(_myInterfaceFilter, typeof(IEasyDIDecore<>).Name);
-                        typeInterfacesOutput = interfacessFound[0];
+                        if (interfacessFound.Count() > 0)
+                            typeInterfacesOutput = interfacessFound[0];
+                        else
+                            typeInterfacesOutput = null;
                         return (interfacessFound.Length > 0);
 
 
@@ -261,35 +250,33 @@ namespace EasyDI
                     BindInfor bindInfor = null;
                     var key = EasyDIUltilities.BuildKeyInject(filedType.FieldType, injectAttribute.Tag);
 
-                    if (_tryGetConditionFromThisAndChild(key, out bindInfor))
+                    // start decore handle
+                    List<BindInfor> decoreList = new List<BindInfor>();
+
+                    object lastDecore = obj;
+           
+                    if (_tryGetDecoreFromThisAndChild(key, out decoreList))
                     {
-                        if (checkWherePredict(bindInfor.WherePredict, objectNeedInject, member))
+                        lastDecore = _decore(obj, decoreList);
+                    }
+
+                    //end decore handle
+                    if (lastDecore == obj)//neu chua decore
+                    {
+                        if (_tryGetConditionFromThisAndChild(key, out bindInfor))
                         {
-                            var data = _getObjectDataFromBindInfor(obj, bindInfor, member);
-                            //set value
-                            filedType.SetValue(obj, data);
-
-                            // start decore handle
-                            if (data != null)
+                            if (checkWherePredict(bindInfor.WherePredict, objectNeedInject, member))
                             {
-                                List<BindInfor> decoreList = new List<BindInfor>();
-
-                                if (_tryGetDecoreFromThisAndChild(key, out decoreList))
-                                {
-                                    _decore(data, decoreList);
-                                }
+                                var data = _getObjectDataFromBindInfor(obj, bindInfor, member);
+                                //set value
+                                filedType.SetValue(obj, data);
                             }
-                            //end decore handle
-
-
-
+                        }
+                        else
+                        {
+                            EasyDILog.LogError($"Can't find binding {filedType.FieldType.Name} for field: {filedType.Name}!!");
                         }
                     }
-                    else
-                    {
-                        EasyDILog.LogError($"Can't find binding {filedType.FieldType.Name} for field: {filedType.Name}!!");
-                    }
-
                 }
 
                 void _setForProperties(object obj, MemberInfo member, InjectAttribute injectAttribute)
@@ -297,32 +284,32 @@ namespace EasyDI
                     var proType = ((PropertyInfo)member);
                     BindInfor bindInfor = null;
                     var key = EasyDIUltilities.BuildKeyInject(proType.PropertyType, injectAttribute.Tag);
-                    if (_tryGetConditionFromThisAndChild(key, out bindInfor))
+
+                    object lastDecore = obj;
+              
+                    // start decore handle
+                    List<BindInfor> decoreList = new List<BindInfor>();
+                    if (_tryGetDecoreFromThisAndChild(key, out decoreList))
                     {
-                        if (checkWherePredict(bindInfor.WherePredict, objectNeedInject, member))
+                        lastDecore = _decore(obj, decoreList);
+                    }
+                    //end decore handle
+
+                    if (lastDecore == obj)//neu chua decore
+                        if (_tryGetConditionFromThisAndChild(key, out bindInfor))
                         {
-                            var data = _getObjectDataFromBindInfor(obj, bindInfor, member);
-                            proType.SetValue(obj, data);
-
-                            // start decore handle
-                            if (data != null)
+                            if (checkWherePredict(bindInfor.WherePredict, objectNeedInject, member))
                             {
-                                List<BindInfor> decoreList = new List<BindInfor>();
-                                if (_tryGetDecoreFromThisAndChild(key, out decoreList))
-                                {
-                                    _decore(data, decoreList);
-                                }
+
+                                var data = _getObjectDataFromBindInfor(obj, bindInfor, member);
+                                proType.SetValue(obj, data);
+
                             }
-                            //end decore handle
-
-
-
                         }
-                    }
-                    else
-                    {
-                        EasyDILog.LogError($"Can't find binding {proType.PropertyType.Name} for properties: {proType.Name}!!");
-                    }
+                        else
+                        {
+                            EasyDILog.LogError($"Can't find binding {proType.PropertyType.Name} for properties: {proType.Name}!!");
+                        }
                 }
 
 

@@ -16,12 +16,13 @@ public interface IEasyDIDecore<T>
             EasyDI.EasyDILog.LogError($"Can't add self to decore!");
             return;
         }
-        var oldDecore = Decore as IEasyDIDecore<T>;
-        Decore = newDecore;
-        (newDecore as IEasyDIDecore<T>).PrevDecore = (T)this;
-        (newDecore as IEasyDIDecore<T>).Decore = (T)oldDecore;
-        if (oldDecore != null)
-            oldDecore.PrevDecore = newDecore;
+        var root = GetRoot();
+        //Debug.Log($"root: {root.GetType()}");
+        var oldDecore = (root as IEasyDIDecore<T>).Decore;
+        (root as IEasyDIDecore<T>).Decore = newDecore;
+        (newDecore as IEasyDIDecore<T>).PrevDecore = root;
+        (newDecore as IEasyDIDecore<T>).Decore = oldDecore;
+
     }
 
     void RemoveThisDecore()

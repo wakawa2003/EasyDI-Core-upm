@@ -101,7 +101,7 @@ namespace EasyDI.UnitTest
                 Debug.Log("inject decorator buffSpeed complete!!");
 
 
-            if ((characterController as iHealth).Health != 15)
+            if ((characterController as iHealth).Health != sceneInstaller.buffHeallValue)
                 Debug.LogError("decorator health fail!!!");
             else
                 Debug.Log("inject decorator Health complete!!");
