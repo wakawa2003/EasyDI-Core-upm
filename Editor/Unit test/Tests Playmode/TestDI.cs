@@ -21,7 +21,7 @@ namespace EasyDI.UnitTest
             yield return new WaitForSeconds(0.5f);
 
             Debug.Log($"-----------start check--------------");
-       
+
             Debug.Log($"character health after decore: {(characterController as iHealth).Health}");
             Debug.Log($"character speed after decore: {characterController.Speed}");
 
@@ -29,7 +29,7 @@ namespace EasyDI.UnitTest
                 Debug.LogError("inject stringInMethod fail");
             else
                 Debug.Log("inject stringInMethod complete!!");
-                    
+
 
             if (string.IsNullOrEmpty(characterController.StringProperties1))
                 Debug.LogError("inject StringProperties1 fail");
@@ -105,6 +105,12 @@ namespace EasyDI.UnitTest
                 Debug.LogError("decorator health fail!!!");
             else
                 Debug.Log("inject decorator Health complete!!");
+
+            Debug.Log("characterController decorator List: ");
+            foreach (var item in (characterController as iHealth).ToListDecore())
+            {
+                Debug.Log($"        {item.GetType()} hash: {item.GetHashCode()}");
+            }
 
             Debug.Log($"--------------end check--------------");
         }

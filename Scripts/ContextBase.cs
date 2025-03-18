@@ -145,7 +145,7 @@ namespace EasyDI
                 }
 
                 //return lastest decore object
-                static object _decore(object obj, List<BindInfor> decoreList, Action<object, MemberInfo, object> setdataPredict)
+                static object _decore(object obj, List<BindInfor> decoreList)
                 {
                     int i = 0;
                     tempIDecore temp = default;
@@ -276,12 +276,7 @@ namespace EasyDI
 
                                 if (_tryGetDecoreFromThisAndChild(key, out decoreList))
                                 {
-                                    _decore(data, decoreList, (obj, member, data) =>
-                                    {
-                                        var fieldType = (member as FieldInfo);
-                                        fieldType.SetValue(obj, data);
-
-                                    });
+                                    _decore(data, decoreList);
                                 }
                             }
                             //end decore handle
@@ -315,12 +310,7 @@ namespace EasyDI
                                 List<BindInfor> decoreList = new List<BindInfor>();
                                 if (_tryGetDecoreFromThisAndChild(key, out decoreList))
                                 {
-                                    _decore(data, decoreList, (obj, member, data) =>
-                                    {
-                                        var fieldType = (member as PropertyInfo);
-                                        fieldType.SetValue(obj, data);
-
-                                    });
+                                    _decore(data, decoreList);
                                 }
                             }
                             //end decore handle
