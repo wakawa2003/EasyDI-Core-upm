@@ -43,8 +43,8 @@ namespace EasyDI
         /// </summary>
         private void GetAllBindInforFromInstallerList()
         {
-            if (InstallerList.Count() == 0)
-                EasyDILog.LogWarning($"Context has name: \'{name}\' doesn't have InstallerList");
+            //if (InstallerList.Count() == 0)
+            //    EasyDILog.LogWarning($"Context has name: \'{name}\' doesn't have InstallerList");
             foreach (var installer in InstallerList)
             {
                 installer.Init();
