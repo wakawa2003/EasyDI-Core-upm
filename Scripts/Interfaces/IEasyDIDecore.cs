@@ -11,6 +11,11 @@ public interface IEasyDIDecore<T>
 
     public void AddDecore(T newDecore)
     {
+        if (newDecore as IEasyDIDecore<T> == this)
+        {
+            EasyDI.EasyDILog.LogError($"Can't add self to decore!");
+            return;
+        }
         var oldDecore = Decore as IEasyDIDecore<T>;
         Decore = newDecore;
         (newDecore as IEasyDIDecore<T>).PrevDecore = (T)this;
@@ -37,8 +42,22 @@ public interface IEasyDIDecore<T>
     T GetRoot()
     {
         var c = (T)this;
+        List<IEasyDIDecore<T>> visited = new List<IEasyDIDecore<T>>();
         while (c != null)
         {
+            if (!visited.Contains(c as IEasyDIDecore<T>))
+                visited.Add(c as IEasyDIDecore<T>);
+            else
+            {
+                visited.Add(c as IEasyDIDecore<T>);
+                EasyDI.EasyDILog.LogError($"Loop decorator detected!");
+                EasyDI.EasyDILog.LogError($"    decorator list: ");
+                foreach (var item in visited)
+                {
+                    EasyDI.EasyDILog.LogError($"   {item.GetType()} hash: {item.GetHashCode()}");
+                }
+                break;
+            }
             if ((c as IEasyDIDecore<T>).PrevDecore != null)
                 c = (c as IEasyDIDecore<T>).PrevDecore;
             if ((c as IEasyDIDecore<T>) == this)
@@ -61,7 +80,7 @@ public interface IEasyDIDecore<T>
         while (nextCheck != null)
         {
             onPeek?.Invoke(nextCheck);
-            nextCheck = (nextCheck as IEasyDIDecore<T>).Decore; 
+            nextCheck = (nextCheck as IEasyDIDecore<T>).Decore;
 
             if (nextCheck != null)//tranh loop
             {
