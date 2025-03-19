@@ -104,6 +104,7 @@ namespace EasyDI
                 {
                     var memberInfor = memberInfoOut[i];
                     var injectAttribute = injectAttributeOut[i];
+                    //var item = memberInfoOut[i];
                     //Debug.Log($"type member: {item.DeclaringType.FullName}");
                     //Debug.Log($"member has Inject:{item}");
 
@@ -254,7 +255,7 @@ namespace EasyDI
                     List<BindInfor> decoreList = new List<BindInfor>();
 
                     object lastDecore = obj;
-           
+
                     if (_tryGetDecoreFromThisAndChild(key, out decoreList))
                     {
                         lastDecore = _decore(obj, decoreList);
@@ -286,7 +287,7 @@ namespace EasyDI
                     var key = EasyDIUltilities.BuildKeyInject(proType.PropertyType, injectAttribute.Tag);
 
                     object lastDecore = obj;
-              
+
                     // start decore handle
                     List<BindInfor> decoreList = new List<BindInfor>();
                     if (_tryGetDecoreFromThisAndChild(key, out decoreList))
@@ -524,7 +525,8 @@ namespace EasyDI
                 List<MemberInfo> memberFoundList = new();
                 List<InjectAttribute> injectAttributeFOundList = new();
 
-                var list = type.FindMembers(MemberTypes.Field | MemberTypes.Method | MemberTypes.Property, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, filer, "ReferenceEquals");
+                //var list = type.FindMembers(MemberTypes.Field | MemberTypes.Method | MemberTypes.Property, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, filer, "ReferenceEquals");
+                var list = GetAllMembersInHirarchy(type, MemberTypes.Field | MemberTypes.Method | MemberTypes.Property, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly, filer, "ReferenceEquals");
 
                 if (memberFoundList.Count > 0)
                     if (injectAttributeFOundList.Count > 0)
@@ -585,29 +587,54 @@ namespace EasyDI
                     }
                     return isValid;
                 }
+
             }
 
 
-            static bool _checkValid(Type type, string typeMember, Dictionary<string, string> dictKey, InjectAttribute att)
+
+        }
+
+        public static List<MemberInfo> GetAllMembersInHirarchy(Type type, MemberTypes memberTypes, BindingFlags bindingFlags, MemberFilter filter, object criteria)
+        {
+            HashSet<string> uniqueNames = new HashSet<string>();
+            List<MemberInfo> members = new List<MemberInfo>();
+
+            Type currentType = type;
+            while (currentType != null)
+            {
+                var foundMembers = currentType.FindMembers(memberTypes, bindingFlags, filter, criteria);
+
+                foreach (var member in foundMembers)
+                {
+                    // Kiểm tra để đảm bảo không trùng lặp
+                    if (uniqueNames.Add(member.Name)) // HashSet.Add trả về false nếu tên đã tồn tại
+                    {
+                        members.Add(member);
+                    }
+                }
+
+                currentType = currentType.BaseType; // Tiếp tục với lớp cha
+            }
+
+            return members; // Trả về danh sách các thành viên không trùng lặp
+        }
+        static bool _checkValid(Type type, string typeMember, Dictionary<string, string> dictKey, InjectAttribute att)
+        {
+
+            //ensure only one member has tag Inject("tag") per one Type per one Object.
+            var key = type + att.Tag + typeMember;
+            if (dictKey.ContainsKey(key))
             {
 
-                //ensure only one member has tag Inject("tag") per one Type per one Object.
-                var key = type + att.Tag + typeMember;
-                if (dictKey.ContainsKey(key))
-                {
-
-                    Debug.LogError($"Contains more than one member \"{typeMember}\" has [Inject(\'{att.Tag}\')] in class \"{type}\"");
-                    return false;
-                }
-                else
-                {
-                    dictKey.Add(key, typeMember);
-                }
-
-                return true;
-
+                Debug.LogError($"Contains more than one member \"{typeMember}\" has [Inject(\'{att.Tag}\')] in class \"{type}\"");
+                return false;
+            }
+            else
+            {
+                dictKey.Add(key, typeMember);
             }
 
+            return true;
 
         }
 

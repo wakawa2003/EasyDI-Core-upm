@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net.WebSockets;
+using System.Reflection;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using UnityEngine;
@@ -111,12 +114,42 @@ namespace EasyDI.UnitTest
             {
                 Debug.Log($"        {item.GetType()} hash: {item.GetHashCode()}");
             }
+            if (testGetDeliverClass())
+                Debug.Log("Test Get Deliver Class complete!!");
+            else
+            {
+                Debug.LogError("Test Get Deliver Class Error!!");
 
+            }
             Debug.Log($"--------------end check--------------");
         }
 
+        static bool testGetDeliverClass()
+        {
+            DerivedClass derived = new DerivedClass();
+            List<MemberInfo> outL = new List<MemberInfo>();
+            List<InjectAttribute> aaa = new List<InjectAttribute>();
+            ContextBase.GetAllMemberNeedInject(derived.GetType(), ref outL, ref aaa);
 
+            //Debug.Log("Test Get Deliver Class:");
+            //foreach (var member in outL)
+            //{
+            //    Debug.Log($"{member.MemberType}: {member.Name}");
+            //}
+            //Debug.Log("----------------");
+            return outL.Count == 3;
+        }
+        class BaseClass
+        {
+            [Inject] public int BaseField;
+            [Inject] public void BaseMethod() { }
+        }
 
+        class DerivedClass : BaseClass
+        {
+            public new int BaseField;
+            [Inject] public void DerivedMethod() { }
+        }
         public class SetupUnitTestEasyDIAttribute : NUnitAttribute, IOuterUnityTestAction
         {
             public IEnumerator BeforeTest(ITest test)

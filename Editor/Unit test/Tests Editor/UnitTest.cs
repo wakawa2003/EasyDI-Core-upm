@@ -26,6 +26,9 @@ namespace EasyDI
 
         }
 
+
+
+
         public class Test
         {
             [SerializeField][Inject] string filedString1;
