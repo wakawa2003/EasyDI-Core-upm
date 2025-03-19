@@ -1,6 +1,6 @@
 {
   "name": "com.doantuan.easydi",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "displayName": "EasyDI",
   "description": "DI framework for Unity!!!",
   "unity": "2019.1",
