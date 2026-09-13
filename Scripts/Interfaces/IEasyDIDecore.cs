@@ -43,27 +43,37 @@ public interface IEasyDIDecore<T>
     T GetRoot()
     {
         var c = (T)this;
-        List<IEasyDIDecore<T>> visited = new List<IEasyDIDecore<T>>();
+        var visited = new HashSet<IEasyDIDecore<T>>();
+
         while (c != null)
         {
-            if (!visited.Contains(c as IEasyDIDecore<T>))
-                visited.Add(c as IEasyDIDecore<T>);
+            var current = c as IEasyDIDecore<T>;
+            if (current == null) break;
+
+            // nếu đã gặp rồi thì coi như loop, trả về ngay
+            if (!visited.Add(current))
+            {
+                EasyDI.EasyDILog.LogError("Loop decorator detected!");
+                return c;
+            }
+
+            // nếu PrevDecore trỏ ngược lại chính c thì trả về c
+            if (current.PrevDecore != null && current.PrevDecore.Equals(c))
+            {
+                return c;
+            }
+
+            // đi ngược lên PrevDecore
+            if (current.PrevDecore != null)
+            {
+                c = current.PrevDecore;
+            }
             else
             {
-                visited.Add(c as IEasyDIDecore<T>);
-                EasyDI.EasyDILog.LogError($"Loop decorator detected!");
-                EasyDI.EasyDILog.LogError($"    decorator list: ");
-                foreach (var item in visited)
-                {
-                    EasyDI.EasyDILog.LogError($"   {item.GetType()} hash: {item.GetHashCode()}");
-                }
                 break;
             }
-            if ((c as IEasyDIDecore<T>).PrevDecore != null)
-                c = (c as IEasyDIDecore<T>).PrevDecore;
-            if ((c as IEasyDIDecore<T>) == this)
-                break;
         }
+
         return c;
     }
 
