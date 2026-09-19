@@ -28,99 +28,81 @@ namespace EasyDI.UnitTest
             Debug.Log($"character health after decore: {(characterController as iHealth).Health}");
             Debug.Log($"character speed after decore: {characterController.Speed}");
 
-            if (string.IsNullOrEmpty(characterController.stringInMethod))
-                Debug.LogError("inject stringInMethod fail");
-            else
-                Debug.Log("inject stringInMethod complete!!");
+            Assert.That(characterController.stringInMethod, Is.Not.Null.And.Not.Empty,
+                "Injection failed for stringInMethod.");
+            Debug.Log("inject stringInMethod complete!!");
 
 
-            if (string.IsNullOrEmpty(characterController.StringProperties1))
-                Debug.LogError("inject StringProperties1 fail");
-            else
-                Debug.Log("inject StringProperties1 complete!!");
+            Assert.That(characterController.StringProperties1, Is.Not.Null.And.Not.Empty,
+                "Injection failed for StringProperties1.");
+            Debug.Log("inject StringProperties1 complete!!");
 
 
-            if (string.IsNullOrEmpty(characterController.stringFieldTag1))
-                Debug.LogError("inject fail stringFieldTag1");
-            else
-                Debug.Log("inject stringFieldTag1 complete!!");
+            Assert.That(characterController.stringFieldTag1, Is.Not.Null.And.Not.Empty,
+                "Injection failed for stringFieldTag1.");
+            Debug.Log("inject stringFieldTag1 complete!!");
 
 
             //for character
-            if (characterController.StringProperties1 == projectInstaller.stringDefault)
-                Debug.LogError("can't overide project context value!");
-            else
-                Debug.Log("inject overide project context value complete!!");
+            Assert.That(characterController.StringProperties1, Is.Not.EqualTo(projectInstaller.stringDefault),
+                "Scene value did not override the project context value for StringProperties1.");
+            Debug.Log("inject overide project context value complete!!");
 
-            if (characterController.stringFieldTag2 != sceneInstaller.stringInstallForTag2)
-                Debug.LogError("can't overide project context value!");
-            else
-                Debug.Log("inject  overide project context value complete!!");
+            Assert.That(characterController.stringFieldTag2, Is.EqualTo(sceneInstaller.stringInstallForTag2),
+                "Scene value was not injected for stringFieldTag2.");
+            Debug.Log("inject  overide project context value complete!!");
 
-            if (characterController.stringInMethod == projectInstaller.stringDefault)
-                Debug.LogError("can't overide project context value!");
-            else
-                Debug.Log("inject overide project context value complete!!");
+            Assert.That(characterController.stringInMethod, Is.Not.EqualTo(projectInstaller.stringDefault),
+                "Scene value did not override the project context value for stringInMethod.");
+            Debug.Log("inject overide project context value complete!!");
 
-            if (characterController.stringFieldSingletonHasTag != sceneInstaller.stringTagForTagSingleton)
-                Debug.LogError("can't inject singleton!");
-            else
-                Debug.Log("inject inject singleton complete!!");
+            Assert.That(characterController.stringFieldSingletonHasTag, Is.EqualTo(sceneInstaller.stringTagForTagSingleton),
+                "Singleton value was not injected for stringFieldSingletonHasTag.");
+            Debug.Log("inject inject singleton complete!!");
 
-            if (characterController.intInmethod != characterInstaller.intInMethod)
-                Debug.LogError("can't inject singleton!");
-            else
-                Debug.Log("inject inject singleton complete!!");
+            Assert.That(characterController.intInmethod, Is.EqualTo(characterInstaller.intInMethod),
+                "Singleton value was not injected for intInmethod.");
+            Debug.Log("inject inject singleton complete!!");
 
             //for gun
-            if (string.IsNullOrEmpty(gunController.stringField))
-                Debug.LogError("inject fail");
-            else
-                Debug.Log("inject gunController.stringField complete!!");
+            Assert.That(gunController.stringField, Is.Not.Null.And.Not.Empty,
+                "Injection failed for gunController.stringField.");
+            Debug.Log("inject gunController.stringField complete!!");
 
-            if (gunController.characterOwner == null)
-                Debug.LogError("inject fail");
-            else
-                Debug.Log("inject gunController.characterOwner complete!!");
+            Assert.That(gunController.characterOwner, Is.Not.Null,
+                "Injection failed for gunController.characterOwner.");
+            Debug.Log("inject gunController.characterOwner complete!!");
 
-            if (gunController.stringField == projectInstaller.stringDefault)
-                Debug.LogError("can't overide project context value!");
-            else
-                Debug.Log("inject gunController.stringField complete!!");
+            Assert.That(gunController.stringField, Is.Not.EqualTo(projectInstaller.stringDefault),
+                "Scene value did not override the project context value for gunController.stringField.");
+            Debug.Log("inject gunController.stringField complete!!");
 
 
             //yield return new WaitForSeconds(0.5f);
 
             //check singleton inject
-            if (characterController.classIsSingleton != gunController.classIsSingleton)
-                Debug.LogError("singleton inject fail!");
-            else
-                Debug.Log("inject singleton inject complete!!");
+            Assert.That(characterController.classIsSingleton, Is.SameAs(gunController.classIsSingleton),
+                "Singleton injection returned different instances.");
+            Debug.Log("inject singleton inject complete!!");
 
 
-            if (sceneInstaller.buffSpeedValue + characterInstaller.buffSpeedValue1 * 2 + characterInstaller.buffSpeedValue2 != characterController.Speed)
-                Debug.LogError("decorator buffSpeed fail!!!");
-            else
-                Debug.Log("inject decorator buffSpeed complete!!");
+            Assert.That(characterController.Speed,
+                Is.EqualTo(sceneInstaller.buffSpeedValue + characterInstaller.buffSpeedValue1 * 2 + characterInstaller.buffSpeedValue2),
+                "Decorator speed value is incorrect.");
+            Debug.Log("inject decorator buffSpeed complete!!");
 
 
-            if ((characterController as iHealth).Health != sceneInstaller.buffHeallValue)
-                Debug.LogError("decorator health fail!!!");
-            else
-                Debug.Log("inject decorator Health complete!!");
+            Assert.That((characterController as iHealth).Health, Is.EqualTo(sceneInstaller.buffHeallValue),
+                "Decorator health value is incorrect.");
+            Debug.Log("inject decorator Health complete!!");
 
             Debug.Log("characterController decorator List: ");
             foreach (var item in (characterController as iHealth).ToListDecore())
             {
                 Debug.Log($"        {item.GetType()} hash: {item.GetHashCode()}");
             }
-            if (testGetDeliverClass())
-                Debug.Log("Test Get Deliver Class complete!!");
-            else
-            {
-                Debug.LogError("Test Get Deliver Class Error!!");
-
-            }
+            Assert.That(testGetDeliverClass(), Is.True, "Test Get Deliver Class failed.");
+            Debug.Log("Test Get Deliver Class complete!!");
             Debug.Log($"--------------end check--------------");
         }
 
@@ -158,13 +140,12 @@ namespace EasyDI.UnitTest
                 yield return setupSceneContext();
                 yield return setupGameObject();
                 yield return setupIngameControllerTest();
-                yield return new EnterPlayMode();
             }
 
             public IEnumerator AfterTest(ITest test)
             {
                 Debug.Log($"End test!!");
-                yield return new ExitPlayMode();
+                yield return null;
             }
 
             IEnumerator setupProjectContext()
@@ -176,9 +157,9 @@ namespace EasyDI.UnitTest
                 projectCOntext.gameObject.AddComponent<projectInstaller>();
                 projectCOntext.gameObject.AddComponent<ProjectContext>();
                 var p = ProjectContext.Ins;
-                //LogAssert.Expect(LogType.Log, "Before Test!!");
-                if (projectCOntext.gameObject != p.gameObject)
-                    LogAssert.Expect(LogType.Error, "Khoi tao PJ Context fail!!");
+                Assert.That(p, Is.Not.Null, "ProjectContext was not initialized.");
+                Assert.That(projectCOntext.gameObject, Is.SameAs(p.gameObject),
+                    "ProjectContext was initialized on the wrong GameObject.");
                 yield return null;
             }
 
